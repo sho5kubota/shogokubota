@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="送信完了 | Sho5 Guide Service">
+  <div class="thanks-page">
+    <h1>送信完了</h1>
+    <p>お問い合わせいただきありがとうございます。<br />内容を確認の上、折り返しご連絡いたします。</p>
+    <a href="/" class="btn-yellow">トップページに戻る</a>
+  </div>
+</Layout>
+
+<style>
+  .thanks-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #666;
+  }
+</style>

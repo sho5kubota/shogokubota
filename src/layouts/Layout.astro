@@ -1,0 +1,42 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = '琵琶湖バスフィッシングガイド｜スキルアップ重視・再現性のある釣りを丁寧にサポート',
+  description = '琵琶湖を舞台に、釣果だけを追わず、次回以降の釣行につながるスキルアップを重視したバスフィッシングガイド。基本から季節に応じたポイント選び・釣り方まで丁寧にサポートし、他のフィールドでも活かせる釣りを目指します。',
+  ogImage = 'https://storage.googleapis.com/production-os-assets/assets/a0db5e5d-b95f-4016-aa53-86fd483a643e',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="all" />
+    <meta property="og:site_name" content={title} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://shogokubota.com/" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:image" content={ogImage} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
