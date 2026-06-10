@@ -191,6 +191,10 @@ import Layout from '../layouts/Layout.astro';
       <p class="text-center" style="margin-bottom:40px;">お気軽に何でもお申し付け下さい</p>
       <div class="form-container">
         <form action="/api/contact" method="POST">
+          <!-- Honeypot: hidden from real users; bots that fill it are rejected -->
+          <div aria-hidden="true" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;">
+            <label>Company (leave this field empty)<input type="text" name="Company" tabindex="-1" autocomplete="off" /></label>
+          </div>
           <div class="form-group">
             <input type="text" name="Name" class="form-control" placeholder="お名前 *" required />
           </div>

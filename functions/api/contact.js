@@ -7,12 +7,56 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Hosts allowed to submit the contact form. Blocks bots POSTing directly to
+// the endpoint and cross-site submissions.
+const ALLOWED_HOSTS = ['shogokubota.com', 'www.shogokubota.com'];
+
+function hostOf(url) {
+  try { return new URL(url).host; } catch { return null; }
+}
+
 export async function onRequestPost({ request, env }) {
+  // --- Spam guard 1: Origin / Referer must be our own site ---
+  const originHost = hostOf(request.headers.get('Origin'));
+  const refererHost = hostOf(request.headers.get('Referer'));
+  if (originHost) {
+    if (!ALLOWED_HOSTS.includes(originHost)) return new Response('Forbidden', { status: 403 });
+  } else if (refererHost) {
+    if (!ALLOWED_HOSTS.includes(refererHost)) return new Response('Forbidden', { status: 403 });
+  } else {
+    return new Response('Forbidden', { status: 403 });
+  }
+
   const formData = await request.formData();
   const name = (formData.get('Name') || '').slice(0, 200).replace(/[\r\n]/g, '');
   const email = (formData.get('Email') || '').slice(0, 200).replace(/[\r\n]/g, '');
   const message = (formData.get('Message') || '').slice(0, 5000);
   const confirm = formData.get('Confirm');
+
+  // --- Spam guard 2: Honeypot. Real users never fill the hidden "Company"
+  // field; bots usually do. Pretend success without sending any mail. ---
+  if ((formData.get('Company') || '').trim() !== '') {
+    return Response.redirect(new URL('/thanks', request.url).toString(), 303);
+  }
+
+  // --- Spam guard 3: Cloudflare Turnstile. Active only once
+  // TURNSTILE_SECRET_KEY is set in the environment, so deploying this code
+  // before the key is configured does not break the form. ---
+  if (env.TURNSTILE_SECRET_KEY) {
+    const token = formData.get('cf-turnstile-response');
+    if (!token) return new Response('Captcha required', { status: 400 });
+    const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        secret: env.TURNSTILE_SECRET_KEY,
+        response: token,
+        remoteip: request.headers.get('CF-Connecting-IP') || '',
+      }),
+    });
+    const outcome = await verify.json();
+    if (!outcome.success) return new Response('Captcha verification failed', { status: 403 });
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!name || !email || !confirm || !emailRegex.test(email)) {
